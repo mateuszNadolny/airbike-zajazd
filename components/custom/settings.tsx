@@ -28,7 +28,14 @@ const Settings = () => {
           }}
           whileTap={{ scale: 0.95 }}
         >
-          <SettingsIcon className="text-smalt-50 font-bold" />
+          <SettingsIcon
+            className="text-smalt-50 font-regular"
+            style={{
+              strokeWidth: 1.2,
+              width: 25,
+              height: 25,
+            }}
+          />
         </motion.div>
       </DrawerTrigger>
       <DrawerContent className="bg-smalt-0 shadow-xl border-none outline-none">

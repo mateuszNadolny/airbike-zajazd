@@ -163,6 +163,7 @@ const SettingsForm = () => {
       workTime: 145, // 2:25
       restTime: 20, // 0:20
       rounds: 8,
+      accelerations: false,
     },
   });
 

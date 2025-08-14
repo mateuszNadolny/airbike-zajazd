@@ -48,11 +48,25 @@ export default function Home() {
         <Settings />
 
         <Button className="w-20 h-20 bg-smalt-600 rounded-full flex items-center justify-center">
-          <Play className="text-smalt-50 font-bold text-6xl w-10 h-10" />
+          <Play
+            className="text-smalt-50 font-bold text-6xl w-10 h-10"
+            style={{
+              strokeWidth: 1.2,
+              width: 40,
+              height: 40,
+            }}
+          />
         </Button>
 
-        <Button className="w-14 h-14 bg-smalt-600 rounded-full flex items-center justify-center">
-          <RotateCcw className="text-smalt-50 font-bold" />
+        <Button className="w-14 h-14 bg-smalt-600 rounded-full flex items-center justify-center active:-rotate-90 transition-all duration-200 ease-in-out">
+          <RotateCcw
+            className="text-smalt-50 font-regular"
+            style={{
+              strokeWidth: 1.2,
+              width: 25,
+              height: 25,
+            }}
+          />
         </Button>
       </motion.div>
     </main>
