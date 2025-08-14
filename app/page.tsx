@@ -17,7 +17,7 @@ export default function Home() {
       </motion.h1>
 
       <motion.p
-        className="text-smalt-50 opacity-50 text-xl font-semibold tracking-tight mb-4"
+        className="text-muted-foreground  opacity-50 text-xl font-semibold tracking-tight mb-4"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 0.5, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
@@ -34,7 +34,7 @@ export default function Home() {
         <p className="text-smalt-600 text-[8rem] font-[900] tracking-tight">
           02:00
         </p>
-        <p className="text-smalt-50/60 text-xl font-semibold tracking-tight -my-6 mb-8">
+        <p className="text-smalt-50 text-xl font-semibold tracking-tight -my-6 mb-8">
           Spokojna praca
         </p>
       </motion.div>
@@ -48,7 +48,7 @@ export default function Home() {
         <Settings />
 
         <Button className="w-20 h-20 bg-smalt-600 rounded-full flex items-center justify-center">
-          <Play className="text-smalt-50 font-bold text-8xl w-15 h-15" />
+          <Play className="text-smalt-50 font-bold text-6xl w-10 h-10" />
         </Button>
 
         <Button className="w-14 h-14 bg-smalt-600 rounded-full flex items-center justify-center">

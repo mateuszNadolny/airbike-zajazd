@@ -292,22 +292,23 @@ const SettingsForm = () => {
               <FormLabel className="text-base text-smalt-50 tracking-tight font-semibold">
                 Przyspieszenia?
               </FormLabel>
-              <FormDescription className="text-xs text-smalt-50/60 text-center p-2">
-                Przyspieszenia pojawiają się w losowej ilości w losowych
-                momentach cyklu pracy.
-              </FormDescription>
+
               <FormControl>
                 <Switch
                   checked={field.value}
                   onCheckedChange={field.onChange}
                 />
               </FormControl>
+              <FormDescription className="text-xs text-muted-foreground text-center p-2">
+                Przyspieszenia pojawiają się w losowej ilości w losowych
+                momentach cyklu pracy.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <Button type="submit" className="w-full bg-smalt-500 text-smalt-50">
+        <Button type="submit" className="w-1/3 bg-smalt-500 text-smalt-50">
           Zapisz
         </Button>
       </form>
