@@ -183,7 +183,7 @@ const TimeInput = ({
   );
 };
 
-const SettingsForm = () => {
+const SettingsForm = ({ onClose }: { onClose: () => void }) => {
   const {
     preparationTime,
     workTime,
@@ -237,6 +237,7 @@ const SettingsForm = () => {
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     updateAllSettings(values);
     console.log("Settings updated:", values);
+    onClose(); // Close the drawer after successful submission
   };
 
   const watchedAccelerations = form.watch("accelerations");

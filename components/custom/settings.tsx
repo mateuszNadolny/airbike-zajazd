@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Drawer,
   DrawerClose,
@@ -15,8 +16,14 @@ import { motion } from "motion/react";
 import { Settings as SettingsIcon } from "lucide-react";
 
 const Settings = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleClose = () => {
+    setIsOpen(false);
+  };
+
   return (
-    <Drawer>
+    <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger>
         <motion.div
           className="w-14 h-14 bg-smalt-600 rounded-full flex items-center justify-center"
@@ -43,7 +50,7 @@ const Settings = () => {
           <DrawerTitle className="text-smalt-50">Ustawienia</DrawerTitle>
           <DrawerDescription>Dostosuj swój trening</DrawerDescription>
         </DrawerHeader>
-        <SettingsForm />
+        <SettingsForm onClose={handleClose} />
       </DrawerContent>
     </Drawer>
   );
