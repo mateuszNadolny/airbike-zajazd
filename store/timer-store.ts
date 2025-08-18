@@ -20,7 +20,6 @@ export interface TimerSettings {
 
 interface TimerState extends TimerSettings {
   accelerationIntervals: AccelerationInterval[];
-  _lastAccelerationTime?: number; // Track last acceleration start time for logging
   updatePreparationTime: (time: number) => void;
   updateWorkTime: (time: number) => void;
   updateRestTime: (time: number) => void;
@@ -61,17 +60,26 @@ const generateAccelerationIntervals = (
   const minutes = workTime / 60;
   const targetAccelerations = Math.floor(accelerationsPerMinute * minutes);
 
+  // Timing constraints: no accelerations in first 2s or last 2s
+  const safeStartTime = 2;
+  const safeEndTime = workTime - 2;
+
+  // Check if we have enough time for accelerations
+  if (safeEndTime <= safeStartTime) return [];
+
   let attempts = 0;
   const maxAttempts = 100;
 
   while (intervals.length < targetAccelerations && attempts < maxAttempts) {
     attempts++;
 
-    // Generate random start time (leaving space for duration)
-    const maxStartTime = workTime - minDuration;
-    if (maxStartTime < 0) break;
+    // Generate random start time (respecting safe zones)
+    const maxStartTime = safeEndTime - minDuration;
+    if (maxStartTime < safeStartTime) break;
 
-    const startTime = Math.floor(Math.random() * maxStartTime);
+    const startTime =
+      Math.floor(Math.random() * (maxStartTime - safeStartTime + 1)) +
+      safeStartTime;
     const duration =
       Math.floor(Math.random() * (maxDuration - minDuration + 1)) + minDuration;
     const endTime = startTime + duration;
@@ -81,7 +89,7 @@ const generateAccelerationIntervals = (
       (interval) => startTime < interval.endTime && endTime > interval.startTime
     );
 
-    if (!overlaps && endTime <= workTime) {
+    if (!overlaps && endTime <= safeEndTime) {
       intervals.push({ startTime, duration, endTime });
     }
   }
@@ -264,38 +272,13 @@ export const useTimerStore = create<TimerState>()(
 
       getCurrentAcceleration: (currentTime: number) => {
         const { accelerationIntervals } = get();
-        const currentAcceleration =
+        return (
           accelerationIntervals.find(
             (interval) =>
               currentTime >= interval.startTime &&
               currentTime < interval.endTime
-          ) || null;
-
-        // Console log when entering/leaving acceleration periods
-        if (currentAcceleration) {
-          const lastAccelerationTime = get()._lastAccelerationTime;
-          const isNewAcceleration =
-            !lastAccelerationTime ||
-            lastAccelerationTime < currentAcceleration.startTime;
-
-          if (isNewAcceleration) {
-            console.log("🚀 ACCELERATION START:", {
-              time: `${Math.floor(currentTime / 60)}:${(currentTime % 60)
-                .toString()
-                .padStart(2, "0")}`,
-              duration: `${currentAcceleration.duration}s`,
-              endTime: `${Math.floor(currentAcceleration.endTime / 60)}:${(
-                currentAcceleration.endTime % 60
-              )
-                .toString()
-                .padStart(2, "0")}`,
-            });
-            // Store the start time to avoid repeated logs
-            set({ _lastAccelerationTime: currentAcceleration.startTime });
-          }
-        }
-
-        return currentAcceleration;
+          ) || null
+        );
       },
 
       resetToDefaults: () => {
@@ -303,7 +286,6 @@ export const useTimerStore = create<TimerState>()(
         set({
           ...defaultSettings,
           accelerationIntervals: [],
-          _lastAccelerationTime: undefined,
         });
       },
     }),

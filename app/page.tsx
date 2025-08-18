@@ -1,10 +1,11 @@
 "use client";
-import { Play, RotateCcw, Pause } from "lucide-react";
+import { Play, RotateCcw, Pause, Volume2, VolumeX } from "lucide-react";
 import { motion } from "motion/react";
 import Settings from "@/components/custom/settings";
 import { Button } from "@/components/ui/button";
 import { useTimerStore } from "@/store/timer-store";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { audioManager } from "@/lib/audio";
 
 export type TimerPhase = "preparation" | "work" | "rest";
 
@@ -66,6 +67,7 @@ export default function Home() {
     restTime,
     rounds,
     accelerations,
+    accelerationIntervals,
     generateAccelerations,
   } = useTimerStore();
 
@@ -77,18 +79,31 @@ export default function Home() {
     currentRound: 1,
   });
 
+  const [isMuted, setIsMuted] = useState(false);
+  const lastAccelerationState = useRef<boolean>(false);
+
   // Initialize timer when settings change
   useEffect(() => {
     if (accelerations) {
       generateAccelerations();
     }
 
-    setTimerState((prev) => ({
-      ...prev,
-      totalTime: preparationTime,
-      currentTime: 0,
-      phase: "preparation",
-    }));
+    // If preparation time is 0, start directly in work phase
+    if (preparationTime === 0) {
+      setTimerState((prev) => ({
+        ...prev,
+        totalTime: workTime,
+        currentTime: 0,
+        phase: "work",
+      }));
+    } else {
+      setTimerState((prev) => ({
+        ...prev,
+        totalTime: preparationTime,
+        currentTime: 0,
+        phase: "preparation",
+      }));
+    }
   }, [
     preparationTime,
     workTime,
@@ -112,17 +127,52 @@ export default function Home() {
             return handlePhaseComplete(prev);
           }
 
+          // Check for acceleration state changes and play sounds
+          if (prev.phase === "work" && accelerations) {
+            const { getCurrentAcceleration } = useTimerStore.getState();
+            const currentAcceleration = getCurrentAcceleration(newTime);
+            const wasInAcceleration = lastAccelerationState.current;
+            const isInAcceleration = !!currentAcceleration;
+
+            // Play acceleration start sound
+            if (!wasInAcceleration && isInAcceleration) {
+              audioManager.play("acc_start");
+            }
+            // Play acceleration end sound
+            else if (wasInAcceleration && !isInAcceleration) {
+              audioManager.play("acc_end");
+            }
+
+            lastAccelerationState.current = isInAcceleration;
+          }
+
           return { ...prev, currentTime: newTime };
         });
       }, 1000);
     }
 
     return () => clearInterval(interval);
+  }, [
+    timerState.isRunning,
+    timerState.currentTime,
+    timerState.totalTime,
+    accelerations,
+  ]);
+
+  // Handle immediate phase transitions (like 0 preparation time)
+  useEffect(() => {
+    if (
+      timerState.isRunning &&
+      timerState.currentTime >= timerState.totalTime
+    ) {
+      setTimerState((prev) => handlePhaseComplete(prev));
+    }
   }, [timerState.isRunning, timerState.currentTime, timerState.totalTime]);
 
   const handlePhaseComplete = (prev: TimerState): TimerState => {
     if (prev.phase === "preparation") {
-      // Move to work phase
+      // Move to work phase - play work start sound
+      audioManager.play("bell_start");
       return {
         ...prev,
         phase: "work",
@@ -130,6 +180,9 @@ export default function Home() {
         totalTime: workTime,
       };
     } else if (prev.phase === "work") {
+      // Work phase completed - play work end sound
+      audioManager.play("bell_end");
+
       // Check if there are more rounds
       if (prev.currentRound < rounds) {
         if (restTime > 0) {
@@ -142,6 +195,7 @@ export default function Home() {
           };
         } else {
           // No rest time, move directly to next round work phase
+          audioManager.play("bell_start");
           return {
             ...prev,
             phase: "work",
@@ -151,7 +205,7 @@ export default function Home() {
           };
         }
       } else {
-        // Workout complete
+        // Workout complete - no need to play bell_end again since it already played
         return {
           ...prev,
           isRunning: false,
@@ -163,6 +217,7 @@ export default function Home() {
       }
     } else if (prev.phase === "rest") {
       // Move directly to work phase for next round (skip preparation)
+      audioManager.play("bell_start");
       return {
         ...prev,
         phase: "work",
@@ -178,13 +233,25 @@ export default function Home() {
   const handleStart = () => {
     if (timerState.currentTime >= timerState.totalTime) {
       // Reset to beginning
-      setTimerState({
-        phase: "preparation",
-        currentTime: 0,
-        totalTime: preparationTime,
-        isRunning: true,
-        currentRound: 1,
-      });
+      if (preparationTime === 0) {
+        // Start directly in work phase if no preparation time
+        setTimerState({
+          phase: "work",
+          currentTime: 0,
+          totalTime: workTime,
+          isRunning: true,
+          currentRound: 1,
+        });
+      } else {
+        // Start with preparation phase
+        setTimerState({
+          phase: "preparation",
+          currentTime: 0,
+          totalTime: preparationTime,
+          isRunning: true,
+          currentRound: 1,
+        });
+      }
     } else {
       // Resume or start
       setTimerState((prev) => ({ ...prev, isRunning: true }));
@@ -196,13 +263,30 @@ export default function Home() {
   };
 
   const handleReset = () => {
-    setTimerState({
-      phase: "preparation",
-      currentTime: 0,
-      totalTime: preparationTime,
-      isRunning: false,
-      currentRound: 1,
-    });
+    if (preparationTime === 0) {
+      // Reset directly to work phase if no preparation time
+      setTimerState({
+        phase: "work",
+        currentTime: 0,
+        totalTime: workTime,
+        isRunning: false,
+        currentRound: 1,
+      });
+    } else {
+      // Reset to preparation phase
+      setTimerState({
+        phase: "preparation",
+        currentTime: 0,
+        totalTime: preparationTime,
+        isRunning: false,
+        currentRound: 1,
+      });
+    }
+  };
+
+  const handleToggleMute = () => {
+    const newMutedState = audioManager.toggleMute();
+    setIsMuted(newMutedState);
   };
 
   const formatTime = (seconds: number) => {
@@ -309,6 +393,34 @@ export default function Home() {
               height: 25,
             }}
           />
+        </motion.button>
+
+        {/* Mute/Unmute Button */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          className="w-14 h-14 bg-smalt-600 rounded-full flex items-center justify-center"
+          onClick={handleToggleMute}
+          aria-label={isMuted ? "Unmute sounds" : "Mute sounds"}
+        >
+          {isMuted ? (
+            <VolumeX
+              className="text-smalt-50"
+              style={{
+                strokeWidth: 1.2,
+                width: 25,
+                height: 25,
+              }}
+            />
+          ) : (
+            <Volume2
+              className="text-smalt-50"
+              style={{
+                strokeWidth: 1.2,
+                width: 25,
+                height: 25,
+              }}
+            />
+          )}
         </motion.button>
       </motion.div>
     </main>
