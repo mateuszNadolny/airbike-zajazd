@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { format } from "date-fns";
+import { motion } from "framer-motion";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { useTimerStore } from "@/store/timer-store";
 
 const formSchema = z.object({
   preparationTime: z
@@ -120,57 +122,84 @@ const TimeInput = ({
     setInputValue(secondsToTimeString(newValue));
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+  };
+
   return (
     <div className="flex items-center bg-smalt-900 rounded-lg ">
-      <Button
+      <motion.button
         type="button"
-        size="sm"
+        whileTap={{ scale: 0.9 }}
         onClick={handleDecrement}
         className="bg-smalt-500 text-2xl text-smalt-50 w-10 h-10 p-0 rounded-lg"
         aria-label="Decrease time"
       >
         -
-      </Button>
+      </motion.button>
       <Input
         value={inputValue}
         onChange={handleInputChange}
         onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
+        readOnly
         placeholder="0:00"
         className="w-20 border-none rounded-none text-center font-mono text-smalt-50 focus-visible:ring-0 focus-visible:ring-offset-0"
       />
-      <Button
+      <motion.button
         type="button"
-        size="sm"
+        whileTap={{ scale: 0.9 }}
         onClick={handleIncrement}
-        className="bg-smalt-500 text-2xl text-smalt-50 w-10 h-10 p-0"
+        className="bg-smalt-500 text-2xl text-smalt-50 w-10 h-10 p-0 rounded-lg"
         aria-label="Increase time"
       >
         +
-      </Button>
+      </motion.button>
     </div>
   );
 };
 
-function onSubmit(values: z.infer<typeof formSchema>) {
-  console.log(values);
-}
-
 const SettingsForm = () => {
+  const {
+    preparationTime,
+    workTime,
+    restTime,
+    rounds,
+    accelerations,
+    updateAllSettings,
+  } = useTimerStore();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      preparationTime: 10,
-      workTime: 145, // 2:25
-      restTime: 20, // 0:20
-      rounds: 8,
-      accelerations: false,
+      preparationTime,
+      workTime,
+      restTime,
+      rounds,
+      accelerations,
     },
   });
+
+  // Sync form with store values when they change
+  useEffect(() => {
+    form.reset({
+      preparationTime,
+      workTime,
+      restTime,
+      rounds,
+      accelerations,
+    });
+  }, [preparationTime, workTime, restTime, rounds, accelerations, form]);
+
+  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    updateAllSettings(values);
+    console.log("Settings updated:", values);
+  };
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-6 flex flex-col items-center mb-8"
       >
         <FormField
@@ -249,36 +278,38 @@ const SettingsForm = () => {
               </FormLabel>
               <FormControl>
                 <div className="flex items-center bg-smalt-900 rounded-lg">
-                  <Button
+                  <motion.button
                     type="button"
-                    size="sm"
+                    whileTap={{ scale: 0.9 }}
                     onClick={() => field.onChange(Math.max(field.value - 1, 1))}
-                    className="bg-smalt-500 text-2xl text-smalt-50 w-10 h-10 p-0"
+                    className="bg-smalt-500 text-2xl text-smalt-50 w-10 h-10 p-0 rounded-lg"
                     aria-label="Decrease rounds"
                   >
                     -
-                  </Button>
+                  </motion.button>
                   <Input
                     {...field}
                     type="number"
                     min={1}
                     max={100}
-                    className="w-20 border-none rounded-none text-center font-mono text-smalt-50/80 focus-visible:ring-0 focus-visible:ring-offset-0"
+                    readOnly
+                    onKeyDown={(e) => e.preventDefault()}
+                    className="w-20 border-none rounded-none text-center font-mono text-smalt-50 focus-visible:ring-0 focus-visible:ring-offset-0"
                     onChange={(e) =>
                       field.onChange(parseInt(e.target.value) || 1)
                     }
                   />
-                  <Button
+                  <motion.button
                     type="button"
-                    size="sm"
+                    whileTap={{ scale: 0.9 }}
                     onClick={() =>
                       field.onChange(Math.min(field.value + 1, 100))
                     }
-                    className="bg-smalt-500 text-2xl text-smalt-50 w-10 h-10 p-0"
+                    className="bg-smalt-500 text-2xl text-smalt-50 w-10 h-10 p-0 rounded-lg"
                     aria-label="Increase rounds"
                   >
                     +
-                  </Button>
+                  </motion.button>
                 </div>
               </FormControl>
               <FormMessage />
