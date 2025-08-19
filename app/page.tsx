@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Play, RotateCcw, Pause, Volume2, VolumeX } from "lucide-react";
 import { motion } from "motion/react";
 
