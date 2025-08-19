@@ -4,10 +4,8 @@ import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { format } from "date-fns";
 import { motion } from "framer-motion";
 
-import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -20,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useTimerStore } from "@/store/timer-store";
+import { secondsToTimeString, parseTimeString } from "@/lib/utils";
 
 const formSchema = z.object({
   preparationTime: z
@@ -80,28 +79,6 @@ const formSchema = z.object({
       message: "Cannot exceed 6 accelerations per minute",
     }),
 });
-
-const secondsToTimeString = (seconds: number): string => {
-  const date = new Date(0);
-  date.setSeconds(seconds);
-  return format(date, "m:ss");
-};
-
-const parseTimeString = (timeString: string): number | null => {
-  try {
-    const match = timeString.match(/^(\d+):(\d{2})$/);
-    if (!match) return null;
-
-    const minutes = parseInt(match[1], 10);
-    const seconds = parseInt(match[2], 10);
-
-    if (seconds >= 60) return null;
-
-    return minutes * 60 + seconds;
-  } catch {
-    return null;
-  }
-};
 
 const TimeInput = ({
   value,
