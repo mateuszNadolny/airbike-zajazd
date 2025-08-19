@@ -187,7 +187,6 @@ const SettingsForm = ({ onClose }: { onClose: () => void }) => {
     },
   });
 
-  // Sync form with store values when they change
   useEffect(() => {
     form.reset({
       preparationTime,
@@ -214,7 +213,7 @@ const SettingsForm = ({ onClose }: { onClose: () => void }) => {
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     updateAllSettings(values);
     console.log("Settings updated:", values);
-    onClose(); // Close the drawer after successful submission
+    onClose();
   };
 
   const watchedAccelerations = form.watch("accelerations");
@@ -363,7 +362,6 @@ const SettingsForm = ({ onClose }: { onClose: () => void }) => {
           )}
         />
 
-        {/* Acceleration Settings - Only visible when accelerations are enabled */}
         {watchedAccelerations && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}

@@ -35,9 +35,10 @@ interface TimerState extends TimerSettings {
 }
 
 const defaultSettings: TimerSettings = {
+  // kazdyz ponizszych czasow jest w sekundach
   preparationTime: 10,
-  workTime: 120, // 2:00
-  restTime: 60, // 1:00
+  workTime: 120,
+  restTime: 60,
   rounds: 4,
   accelerations: false,
   minAccelerationDuration: 2,
@@ -45,7 +46,6 @@ const defaultSettings: TimerSettings = {
   accelerationsPerMinute: 4,
 };
 
-// Generate random accelerations for a given work time
 const generateAccelerationIntervals = (
   workTime: number,
   minDuration: number,
@@ -56,15 +56,14 @@ const generateAccelerationIntervals = (
 
   const intervals: AccelerationInterval[] = [];
 
-  // Calculate target number of accelerations based on work time
   const minutes = workTime / 60;
   const targetAccelerations = Math.floor(accelerationsPerMinute * minutes);
 
-  // Timing constraints: no accelerations in first 2s or last 2s
+  // bezpieczen strefy na przyspieszenia - pierwsze i ostatnie 2 sekundy nie powinny miec przyspieszen
   const safeStartTime = 2;
   const safeEndTime = workTime - 2;
 
-  // Check if we have enough time for accelerations
+  // sprawdzamy czy mamy wystarczajace czas na przyspieszenia
   if (safeEndTime <= safeStartTime) return [];
 
   let attempts = 0;
@@ -129,7 +128,7 @@ export const useTimerStore = create<TimerState>()(
         const currentState = get();
         const newMinDuration = Math.max(1, Math.min(10, duration));
 
-        // Ensure max duration is at least equal to new min duration
+        // sprawdzamy czy max duration jest wiekszy od min duration
         const newMaxDuration = Math.max(
           newMinDuration,
           currentState.maxAccelerationDuration
@@ -144,7 +143,7 @@ export const useTimerStore = create<TimerState>()(
       updateMaxAccelerationDuration: (duration: number) => {
         const currentState = get();
         const newMaxDuration = Math.max(
-          currentState.minAccelerationDuration, // Must be at least min duration
+          currentState.minAccelerationDuration,
           Math.min(30, duration)
         );
 
@@ -159,7 +158,6 @@ export const useTimerStore = create<TimerState>()(
         const newState = {
           ...currentState,
           ...settings,
-          // Apply validation to ensure values are within bounds
           preparationTime:
             settings.preparationTime !== undefined
               ? Math.max(0, Math.min(30, settings.preparationTime))
@@ -200,29 +198,9 @@ export const useTimerStore = create<TimerState>()(
 
         set(newState);
 
-        // Only regenerate accelerations if:
-        // 1. Work time actually changed (not just submitted with same value)
-        // 2. Acceleration setting was toggled
-        // 3. Acceleration duration or count settings changed
-        const workTimeChanged =
-          settings.workTime !== undefined &&
-          settings.workTime !== currentState.workTime;
-        const accelerationToggled =
-          settings.accelerations !== undefined &&
-          settings.accelerations !== currentState.accelerations;
-        const accelerationSettingsChanged =
-          settings.minAccelerationDuration !== undefined ||
-          settings.maxAccelerationDuration !== undefined ||
-          settings.accelerationsPerMinute !== undefined;
-
-        if (
-          newState.accelerations &&
-          (workTimeChanged ||
-            accelerationToggled ||
-            accelerationSettingsChanged)
-        ) {
-          get().generateAccelerations();
-        }
+        // Clear existing accelerations when settings change
+        // They will be regenerated fresh on workout start
+        set({ accelerationIntervals: [] });
       },
 
       generateAccelerations: () => {
@@ -282,11 +260,16 @@ export const useTimerStore = create<TimerState>()(
       },
 
       resetToDefaults: () => {
-        console.log("🔄 Resetting timer to defaults");
-        set({
+        console.log("�� Resetting timer to defaults");
+        const newState = {
           ...defaultSettings,
           accelerationIntervals: [],
-        });
+        };
+        set(newState);
+
+        if (defaultSettings.accelerations) {
+          get().generateAccelerations();
+        }
       },
     }),
     {
@@ -297,7 +280,6 @@ export const useTimerStore = create<TimerState>()(
         workTime: state.workTime,
         restTime: state.restTime,
         rounds: state.rounds,
-        accelerations: state.accelerations,
         minAccelerationDuration: state.minAccelerationDuration,
         maxAccelerationDuration: state.maxAccelerationDuration,
         accelerationsPerMinute: state.accelerationsPerMinute,

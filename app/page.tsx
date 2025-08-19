@@ -1,13 +1,13 @@
 "use client";
+import { useState, useEffect, useRef } from "react";
 import { Play, RotateCcw, Pause, Volume2, VolumeX } from "lucide-react";
 import { motion } from "motion/react";
+
 import Settings from "@/components/custom/settings";
-import { Button } from "@/components/ui/button";
 import { useTimerStore } from "@/store/timer-store";
-import { useState, useEffect, useRef } from "react";
 import { audioManager } from "@/lib/audio";
 
-export type TimerPhase = "preparation" | "work" | "rest";
+type TimerPhase = "preparation" | "work" | "rest";
 
 interface TimerState {
   phase: TimerPhase;
@@ -27,7 +27,7 @@ const AccelerationIndicator = ({ currentTime }: { currentTime: number }) => {
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="absolute inset-0 flex items-center justify-center"
+      className="absolute inset-0 top-[30%] flex items-center justify-center"
     >
       <div className="bg-red-600/90 text-white px-6 py-3 rounded-full text-2xl font-bold animate-pulse">
         PRZYSPIESZ!
@@ -67,7 +67,6 @@ export default function Home() {
     restTime,
     rounds,
     accelerations,
-    accelerationIntervals,
     generateAccelerations,
   } = useTimerStore();
 
@@ -82,12 +81,8 @@ export default function Home() {
   const [isMuted, setIsMuted] = useState(false);
   const lastAccelerationState = useRef<boolean>(false);
 
-  // Initialize timer when settings change
+  // Initialize timer when settings change (without acceleration generation)
   useEffect(() => {
-    if (accelerations) {
-      generateAccelerations();
-    }
-
     // If preparation time is 0, start directly in work phase
     if (preparationTime === 0) {
       setTimerState((prev) => ({
@@ -104,14 +99,7 @@ export default function Home() {
         phase: "preparation",
       }));
     }
-  }, [
-    preparationTime,
-    workTime,
-    restTime,
-    rounds,
-    accelerations,
-    generateAccelerations,
-  ]);
+  }, [preparationTime, workTime, restTime, rounds]);
 
   // Timer logic
   useEffect(() => {
@@ -231,6 +219,11 @@ export default function Home() {
   };
 
   const handleStart = () => {
+    // Generate fresh accelerations when starting a workout
+    if (accelerations) {
+      generateAccelerations();
+    }
+
     if (timerState.currentTime >= timerState.totalTime) {
       // Reset to beginning
       if (preparationTime === 0) {
@@ -263,6 +256,11 @@ export default function Home() {
   };
 
   const handleReset = () => {
+    // Generate fresh accelerations when resetting
+    if (accelerations) {
+      generateAccelerations();
+    }
+
     if (preparationTime === 0) {
       // Reset directly to work phase if no preparation time
       setTimerState({
