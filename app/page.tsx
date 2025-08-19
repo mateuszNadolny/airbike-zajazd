@@ -85,6 +85,16 @@ export default function Home() {
   const [isMuted, setIsMuted] = useState(false);
   const lastAccelerationState = useRef<boolean>(false);
 
+  let buttonAccelerationClasses = "";
+
+  if (currentAcceleration && timerState.phase === "work") {
+    buttonAccelerationClasses = "bg-red-400";
+  } else if (timerState.phase === "rest") {
+    buttonAccelerationClasses = "bg-green-900";
+  } else {
+    buttonAccelerationClasses = "bg-smalt-600";
+  }
+
   // Initialize timer when settings change (without acceleration generation)
   useEffect(() => {
     // If preparation time is 0, start directly in work phase
@@ -307,8 +317,8 @@ export default function Home() {
   return (
     <main
       className={`flex flex-col items-center justify-center h-screen min-h-screen font-be-vietnam-pro transition-colors duration-400 bg-gradient-to-b from-[#18191a] ${
-        currentAcceleration
-          ? "to-red-500 animate-pulse"
+        currentAcceleration && timerState.phase === "work"
+          ? "to-red-400 animate-pulse"
           : timerState.phase === "rest"
           ? "to-green-500"
           : "to-[#0e0e12]"
@@ -340,7 +350,8 @@ export default function Home() {
       >
         <p
           className={`text-[8rem] font-[900] tracking-tight ${
-            currentAcceleration || timerState.phase === "rest"
+            (currentAcceleration && timerState.phase === "work") ||
+            timerState.phase === "rest"
               ? "text-smalt-50"
               : "text-smalt-600"
           }`}
@@ -362,12 +373,15 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3, ease: "easeOut" }}
       >
-        <Settings onClick={handleReset} />
+        <Settings
+          onClick={handleReset}
+          buttonAccelerationClasses={buttonAccelerationClasses}
+        />
 
         {timerState.isRunning ? (
           <motion.button
             whileTap={{ scale: 0.9 }}
-            className="w-20 h-20 bg-smalt-600 rounded-full flex items-center justify-center"
+            className={`w-20 h-20 rounded-full flex items-center justify-center ${buttonAccelerationClasses}`}
             onClick={handlePause}
           >
             <Pause
@@ -382,7 +396,7 @@ export default function Home() {
         ) : (
           <motion.button
             whileTap={{ scale: 0.9 }}
-            className="w-20 h-20 bg-smalt-600 rounded-full flex items-center justify-center"
+            className={`w-20 h-20 rounded-full flex items-center justify-center ${buttonAccelerationClasses}`}
             onClick={handleStart}
           >
             <Play
@@ -398,7 +412,7 @@ export default function Home() {
 
         <motion.button
           whileTap={{ scale: 0.9, rotate: -90 }}
-          className="w-14 h-14 bg-smalt-600 rounded-full flex items-center justify-center"
+          className={`w-14 h-14 rounded-full flex items-center justify-center ${buttonAccelerationClasses}`}
           onClick={handleReset}
         >
           <RotateCcw
@@ -414,7 +428,7 @@ export default function Home() {
         {/* Mute/Unmute Button */}
         <motion.button
           whileTap={{ scale: 0.9 }}
-          className="w-14 h-14 bg-smalt-600 rounded-full flex items-center justify-center"
+          className={`w-14 h-14 rounded-full flex items-center justify-center ${buttonAccelerationClasses}`}
           onClick={handleToggleMute}
           aria-label={isMuted ? "Unmute sounds" : "Mute sounds"}
         >

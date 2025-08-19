@@ -13,7 +13,12 @@ import SettingsForm from "@/components/custom/settings-form";
 import { motion } from "motion/react";
 import { Settings as SettingsIcon } from "lucide-react";
 
-const Settings = ({ onClick }: { onClick: () => void }) => {
+interface SettingsProps {
+  onClick: () => void;
+  buttonAccelerationClasses: string;
+}
+
+const Settings = ({ onClick, buttonAccelerationClasses }: SettingsProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClose = () => {
@@ -24,7 +29,7 @@ const Settings = ({ onClick }: { onClick: () => void }) => {
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger>
         <motion.div
-          className="w-14 h-14 bg-smalt-600 rounded-full flex items-center justify-center"
+          className={`w-14 h-14 rounded-full flex items-center justify-center ${buttonAccelerationClasses}`}
           whileHover={{
             scale: 1.1,
             boxShadow:
