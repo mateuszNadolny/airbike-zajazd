@@ -27,9 +27,9 @@ const AccelerationIndicator = ({ currentTime }: { currentTime: number }) => {
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="absolute inset-0 top-[30%] flex items-center justify-center"
+      className="flex items-center justify-center"
     >
-      <div className="bg-red-600/90 text-white px-6 py-3 rounded-full text-2xl font-bold animate-pulse">
+      <div className="bg-red-600/90 text-white px-6 py-3 rounded-full text-5xl font-bold animate-pulse">
         PRZYSPIESZ!
       </div>
     </motion.div>
@@ -70,6 +70,8 @@ export default function Home() {
     generateAccelerations,
   } = useTimerStore();
 
+  const { getCurrentAcceleration } = useTimerStore();
+
   const [timerState, setTimerState] = useState<TimerState>({
     phase: "preparation",
     currentTime: 0,
@@ -77,6 +79,8 @@ export default function Home() {
     isRunning: false,
     currentRound: 1,
   });
+
+  const currentAcceleration = getCurrentAcceleration(timerState.currentTime);
 
   const [isMuted, setIsMuted] = useState(false);
   const lastAccelerationState = useRef<boolean>(false);
@@ -301,7 +305,15 @@ export default function Home() {
     accelerations && isWorkPhase && timerState.isRunning;
 
   return (
-    <main className="flex flex-col items-center justify-center h-screen min-h-screen font-be-vietnam-pro">
+    <main
+      className={`flex flex-col items-center justify-center h-screen min-h-screen font-be-vietnam-pro transition-colors duration-400 bg-gradient-to-b from-[#18191a] ${
+        currentAcceleration
+          ? "to-red-500 animate-pulse"
+          : timerState.phase === "rest"
+          ? "to-green-500"
+          : "to-[#0e0e12]"
+      }`}
+    >
       <motion.h1
         className="text-4xl font-[900] text-smalt-50 tracking-tighter"
         initial={{ opacity: 0, y: -20 }}
@@ -326,7 +338,13 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
       >
-        <p className="text-smalt-600 text-[8rem] font-[900] tracking-tight">
+        <p
+          className={`text-[8rem] font-[900] tracking-tight ${
+            currentAcceleration || timerState.phase === "rest"
+              ? "text-smalt-50"
+              : "text-smalt-600"
+          }`}
+        >
           {formatTime(remainingTime)}
         </p>
 
