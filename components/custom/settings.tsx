@@ -13,7 +13,7 @@ import SettingsForm from "@/components/custom/settings-form";
 import { motion } from "motion/react";
 import { Settings as SettingsIcon } from "lucide-react";
 
-const Settings = () => {
+const Settings = ({ onClick }: { onClick: () => void }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleClose = () => {
@@ -32,6 +32,7 @@ const Settings = () => {
             transition: { duration: 0.2 },
           }}
           whileTap={{ scale: 0.95 }}
+          onClick={onClick}
         >
           <SettingsIcon
             className="text-smalt-50 font-regular"

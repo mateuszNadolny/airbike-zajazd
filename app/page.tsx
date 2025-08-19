@@ -27,7 +27,7 @@ const AccelerationIndicator = ({ currentTime }: { currentTime: number }) => {
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex items-center justify-center"
+      className="absolute top-[20%] flex items-center justify-center"
     >
       <div className="bg-red-600/90 text-white px-6 py-3 rounded-full text-5xl font-bold animate-pulse">
         PRZYSPIESZ!
@@ -362,7 +362,7 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3, ease: "easeOut" }}
       >
-        <Settings />
+        <Settings onClick={handleReset} />
 
         {timerState.isRunning ? (
           <motion.button
