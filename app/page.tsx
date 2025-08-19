@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Play, RotateCcw, Pause, Volume2, VolumeX } from "lucide-react";
 import { motion } from "motion/react";
 
@@ -173,6 +173,12 @@ export default function Home() {
 
   const handlePhaseComplete = (prev: TimerState): TimerState => {
     if (prev.phase === "preparation") {
+      if (accelerations) {
+        // Defer the call to avoid render cycle issues
+        setTimeout(() => generateAccelerations(), 0);
+        lastAccelerationState.current = false; // Reset state
+      }
+
       // Move to work phase - play work start sound
       audioManager.play("bell_start");
       return {
@@ -218,6 +224,11 @@ export default function Home() {
         };
       }
     } else if (prev.phase === "rest") {
+      if (accelerations) {
+        // Defer the call to avoid render cycle issues
+        setTimeout(() => generateAccelerations(), 0);
+      }
+
       // Move directly to work phase for next round (skip preparation)
       audioManager.play("bell_start");
       return {
@@ -233,15 +244,14 @@ export default function Home() {
   };
 
   const handleStart = () => {
-    // Generate fresh accelerations when starting a workout
-    if (accelerations) {
-      generateAccelerations();
-    }
-
     if (timerState.currentTime >= timerState.totalTime) {
       // Reset to beginning
       if (preparationTime === 0) {
         // Start directly in work phase if no preparation time
+        if (accelerations) {
+          // Defer the call to avoid render cycle issues
+          setTimeout(() => generateAccelerations(), 0);
+        }
         setTimerState({
           phase: "work",
           currentTime: 0,
