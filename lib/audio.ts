@@ -1,4 +1,3 @@
-// Audio utility for timer sound effects
 interface IAudioManager {
   play(soundKey: string): void;
   mute(): void;
@@ -13,7 +12,6 @@ class AudioManager implements IAudioManager {
   private isInitialized: boolean = false;
 
   constructor() {
-    // Only initialize on client side
     if (typeof window !== "undefined") {
       this.loadSounds();
       this.isInitialized = true;
@@ -21,7 +19,6 @@ class AudioManager implements IAudioManager {
   }
 
   private loadSounds() {
-    // Check if Audio API is available
     if (typeof Audio === "undefined") {
       console.warn("Audio API not available");
       return;
@@ -76,13 +73,11 @@ class AudioManager implements IAudioManager {
   }
 }
 
-// Create a singleton instance only on client side
 let audioManager: IAudioManager;
 
 if (typeof window !== "undefined") {
   audioManager = new AudioManager();
 } else {
-  // Create a mock audio manager for server side
   audioManager = {
     play: () => {},
     mute: () => {},
