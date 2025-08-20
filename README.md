@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Airbike Zajazd - Timer App
 
-## Getting Started
+A workout timer application with acceleration intervals and audio notifications.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Workout Timer**: Configurable preparation, work, and rest phases
+- **Acceleration Intervals**: Random acceleration periods during work phases
+- **Audio Notifications**: Sound alerts for phase changes and accelerations
+- **iOS Compatible**: Fixed audio playback issues on iOS devices
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## iOS Audio Solution
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This app includes a comprehensive solution for iOS audio playback issues:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### The Problem
 
-## Learn More
+iOS Safari has strict autoplay policies that prevent audio from playing without user interaction. Traditional HTML5 Audio elements don't work reliably on iOS.
 
-To learn more about Next.js, take a look at the following resources:
+### The Solution
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Web Audio API**: Replaced HTML5 Audio with Web Audio API for better iOS compatibility
+- **Audio Context Management**: Properly handles suspended audio contexts on iOS
+- **User Interaction Tracking**: Ensures audio only plays after user interaction
+- **Audio Buffer Loading**: Loads audio files as ArrayBuffers for iOS compatibility
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### How It Works
 
-## Deploy on Vercel
+1. **Audio Initialization**: Creates AudioContext on component mount
+2. **User Interaction**: Marks first user interaction (click, tap) to enable audio
+3. **Context Resume**: Automatically resumes suspended audio context on iOS
+4. **Buffer Playback**: Converts ArrayBuffers to AudioBuffers for playback
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Audio Files
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `bell_start.mp3` - Work phase start notification
+- `bell_end.mp3` - Work phase end notification
+- `acc_start.mp3` - Acceleration start notification
+- `acc_end.mp3` - Acceleration end notification
+
+## Development
+
+Built with:
+
+- Next.js 14
+- React 18
+- TypeScript
+- TailwindCSS
+- Framer Motion
+- Zustand (state management)
+
+## Usage
+
+1. Configure your workout settings (preparation, work, rest times, rounds)
+2. Enable/disable accelerations and configure their parameters
+3. Click start to begin your workout
+4. Audio will play automatically for phase changes and accelerations
+5. Use the test button to verify audio is working on your device
+
+## iOS Testing
+
+To test on iOS:
+
+1. Open the app in Safari on your iOS device
+2. Wait for "Dźwięk gotowy" (Audio ready) indicator
+3. Tap any button to enable audio
+4. Use the TEST button to verify audio playback
+5. Start your workout - sounds should now play correctly
+
+## Troubleshooting
+
+If audio doesn't work:
+
+1. Ensure you're using a supported browser (Safari, Chrome on iOS)
+2. Check that you've interacted with the page (tapped a button)
+3. Verify audio isn't muted
+4. Check browser console for error messages
+5. Try the TEST button to verify audio functionality
