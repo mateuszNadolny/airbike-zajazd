@@ -309,7 +309,7 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
       >
-        Airbike Zajazd
+        Airbike Zajazd 🚴
       </motion.h1>
 
       <motion.p
