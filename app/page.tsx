@@ -13,6 +13,7 @@ import {
   WorkoutCompletedIndicator,
 } from "@/components/custom/timer/indicator";
 import { TimerPhase } from "@/lib/types";
+import useWakeLock from "@/hooks/useWaveLock";
 
 interface TimerState {
   phase: TimerPhase;
@@ -42,6 +43,9 @@ export default function Home() {
     currentRound: 1,
   });
   const [workoutCompleted, setWorkoutCompleted] = useState(false);
+
+  // Only enable wake lock when timer is running
+  useWakeLock(timerState.isRunning);
 
   const currentAcceleration = getCurrentAcceleration(timerState.currentTime);
 
@@ -338,7 +342,7 @@ export default function Home() {
           {formatTime(remainingTime)}
         </p>
 
-        <PhaseIndicator phase={timerState.phase} />
+        {!currentAcceleration && <PhaseIndicator phase={timerState.phase} />}
 
         {showAccelerations && (
           <AccelerationIndicator currentTime={timerState.currentTime} />

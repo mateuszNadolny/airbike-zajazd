@@ -16,15 +16,13 @@ export const AccelerationIndicator = ({
   if (!currentAcceleration) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="absolute top-[20%] flex items-center justify-center"
+    <motion.p
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`text-2xl font-semibold tracking-tight -my-6 mb-8 text-smalt-50`}
     >
-      <div className="bg-red-600/90 text-white px-6 py-3 rounded-full text-5xl font-bold">
-        PRZYSPIESZ!
-      </div>
-    </motion.div>
+      PRZYSPIESZ!
+    </motion.p>
   );
 };
 

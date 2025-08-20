@@ -192,6 +192,7 @@ class AudioManager implements IAudioManager {
             source.stop();
           } catch (error) {
             // Ignore errors when stopping already stopped source
+            console.error("Failed to stop audio source:", error);
           }
         }
       };
