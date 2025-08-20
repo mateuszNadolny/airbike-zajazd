@@ -9,7 +9,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import SettingsForm from "@/components/custom/settings-form";
+import SettingsForm from "@/components/custom/settings/settings-form";
 import { motion } from "motion/react";
 import { Settings as SettingsIcon } from "lucide-react";
 

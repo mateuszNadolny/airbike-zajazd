@@ -3,11 +3,14 @@ import { useState, useEffect, useRef } from "react";
 import { Play, RotateCcw, Pause, Volume2, VolumeX } from "lucide-react";
 import { motion } from "motion/react";
 
-import Settings from "@/components/custom/settings";
+import Settings from "@/components/custom/settings/settings";
 import { useTimerStore } from "@/store/timer-store";
 import { audioManager } from "@/lib/audio";
-
-type TimerPhase = "preparation" | "work" | "rest";
+import {
+  AccelerationIndicator,
+  PhaseIndicator,
+} from "@/components/custom/timer/indicator";
+import { TimerPhase } from "@/lib/types";
 
 interface TimerState {
   phase: TimerPhase;
@@ -16,49 +19,6 @@ interface TimerState {
   isRunning: boolean;
   currentRound: number;
 }
-
-const AccelerationIndicator = ({ currentTime }: { currentTime: number }) => {
-  const { getCurrentAcceleration } = useTimerStore();
-  const currentAcceleration = getCurrentAcceleration(currentTime);
-
-  if (!currentAcceleration) return null;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="absolute top-[20%] flex items-center justify-center"
-    >
-      <div className="bg-red-600/90 text-white px-6 py-3 rounded-full text-5xl font-bold animate-pulse">
-        PRZYSPIESZ!
-      </div>
-    </motion.div>
-  );
-};
-
-const PhaseIndicator = ({ phase }: { phase: TimerPhase }) => {
-  const phaseLabels = {
-    preparation: "Przygotowanie",
-    work: "Praca",
-    rest: "Odpoczynek",
-  };
-
-  const phaseColors = {
-    preparation: "text-yellow-400",
-    work: "text-smalt-50",
-    rest: "text-green-400",
-  };
-
-  return (
-    <motion.p
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`text-xl font-semibold tracking-tight -my-6 mb-8 ${phaseColors[phase]}`}
-    >
-      {phaseLabels[phase]}
-    </motion.p>
-  );
-};
 
 export default function Home() {
   const {
@@ -328,7 +288,7 @@ export default function Home() {
     <main
       className={`flex flex-col items-center justify-center h-screen min-h-screen font-be-vietnam-pro transition-colors duration-400 bg-gradient-to-b from-[#18191a] ${
         currentAcceleration && timerState.phase === "work"
-          ? "to-red-400 animate-pulse"
+          ? "to-red-400"
           : timerState.phase === "rest"
           ? "to-green-500"
           : "to-[#0e0e12]"
