@@ -6,9 +6,11 @@ import { motion } from "motion/react";
 import Settings from "@/components/custom/settings/settings";
 import { useTimerStore } from "@/store/timer-store";
 import { audioManager } from "@/lib/audio";
+import { formatTime } from "@/lib/utils";
 import {
   AccelerationIndicator,
   PhaseIndicator,
+  WorkoutCompletedIndicator,
 } from "@/components/custom/timer/indicator";
 import { TimerPhase } from "@/lib/types";
 
@@ -39,6 +41,7 @@ export default function Home() {
     isRunning: false,
     currentRound: 1,
   });
+  const [workoutCompleted, setWorkoutCompleted] = useState(false);
 
   const currentAcceleration = getCurrentAcceleration(timerState.currentTime);
 
@@ -65,6 +68,7 @@ export default function Home() {
         currentTime: 0,
         phase: "work",
       }));
+      setWorkoutCompleted(false);
     } else {
       setTimerState((prev) => ({
         ...prev,
@@ -174,6 +178,7 @@ export default function Home() {
         }
       } else {
         // Workout complete - no need to play bell_end again since it already played
+        setWorkoutCompleted(true);
         return {
           ...prev,
           isRunning: false,
@@ -204,6 +209,10 @@ export default function Home() {
   };
 
   const handleStart = () => {
+    if (workoutCompleted) {
+      setWorkoutCompleted(false);
+    }
+
     if (timerState.currentTime >= timerState.totalTime) {
       // Reset to beginning
       if (preparationTime === 0) {
@@ -247,6 +256,10 @@ export default function Home() {
 
     if (preparationTime === 0) {
       // Reset directly to work phase if no preparation time
+      if (workoutCompleted) {
+        setWorkoutCompleted(false);
+      }
+
       setTimerState({
         phase: "work",
         currentTime: 0,
@@ -256,6 +269,10 @@ export default function Home() {
       });
     } else {
       // Reset to preparation phase
+      if (workoutCompleted) {
+        setWorkoutCompleted(false);
+      }
+
       setTimerState({
         phase: "preparation",
         currentTime: 0,
@@ -269,14 +286,6 @@ export default function Home() {
   const handleToggleMute = () => {
     const newMutedState = audioManager.toggleMute();
     setIsMuted(newMutedState);
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
   };
 
   const remainingTime = timerState.totalTime - timerState.currentTime;
@@ -423,6 +432,13 @@ export default function Home() {
           )}
         </motion.button>
       </motion.div>
+
+      {workoutCompleted && (
+        <WorkoutCompletedIndicator
+          workoutCompleted={workoutCompleted}
+          setWorkoutCompleted={setWorkoutCompleted}
+        />
+      )}
     </main>
   );
 }
