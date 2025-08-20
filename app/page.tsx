@@ -342,7 +342,7 @@ export default function Home() {
           {formatTime(remainingTime)}
         </p>
 
-        {!currentAcceleration && <PhaseIndicator phase={timerState.phase} />}
+        <PhaseIndicator phase={timerState.phase} />
 
         {showAccelerations && (
           <AccelerationIndicator currentTime={timerState.currentTime} />
