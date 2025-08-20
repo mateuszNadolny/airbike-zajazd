@@ -340,7 +340,6 @@ export default function Home() {
 
         <PhaseIndicator phase={timerState.phase} />
 
-        {/* Acceleration Indicator */}
         {showAccelerations && (
           <AccelerationIndicator currentTime={timerState.currentTime} />
         )}
@@ -404,7 +403,6 @@ export default function Home() {
           />
         </motion.button>
 
-        {/* Mute/Unmute Button */}
         <motion.button
           whileTap={{ scale: 0.9 }}
           className={`w-14 h-14 rounded-full flex items-center justify-center ${buttonAccelerationClasses}`}
@@ -434,10 +432,7 @@ export default function Home() {
       </motion.div>
 
       {workoutCompleted && (
-        <WorkoutCompletedIndicator
-          workoutCompleted={workoutCompleted}
-          setWorkoutCompleted={setWorkoutCompleted}
-        />
+        <WorkoutCompletedIndicator setWorkoutCompleted={setWorkoutCompleted} />
       )}
     </main>
   );

@@ -53,10 +53,8 @@ export const PhaseIndicator = ({ phase }: { phase: TimerPhase }) => {
 };
 
 export const WorkoutCompletedIndicator = ({
-  workoutCompleted,
   setWorkoutCompleted,
 }: {
-  workoutCompleted: boolean;
   setWorkoutCompleted: (value: boolean) => void;
 }) => {
   return (
