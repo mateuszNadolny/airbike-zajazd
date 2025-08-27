@@ -217,6 +217,9 @@ export default function Home() {
       setWorkoutCompleted(false);
     }
 
+    // Debug audio status when starting
+    console.log("🎵 Audio status on start:", audioManager.getAudioStatus());
+
     if (timerState.currentTime >= timerState.totalTime) {
       // Reset to beginning
       if (preparationTime === 0) {
