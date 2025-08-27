@@ -16,6 +16,7 @@ class AudioManager implements IAudioManager {
   private isInitialized: boolean = false;
   private hasUserInteracted: boolean = false;
   private isIOS: boolean = false;
+  private isPWA: boolean = false;
   private audioPermissionRequested: boolean = false;
   private audioFiles = [
     { key: "bell_start", path: "/bell_start.mp3" },
@@ -27,8 +28,9 @@ class AudioManager implements IAudioManager {
   constructor() {
     if (typeof window !== "undefined") {
       this.detectIOS();
-      // Don't auto-initialize on iOS - wait for user interaction
-      if (!this.isIOS) {
+      // Initialize audio differently based on iOS and PWA status
+      if (!this.isIOS || this.isPWA) {
+        // Initialize immediately for non-iOS or PWA mode
         this.initializeAudio();
       }
       this.setupUserInteractionListeners();
@@ -39,11 +41,27 @@ class AudioManager implements IAudioManager {
     this.isIOS =
       /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+    // Check if running in PWA mode
+    const isPWA =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as typeof window.navigator & { standalone?: boolean })
+        .standalone === true;
+
     if (this.isIOS) {
-      console.log(
-        "🍎 iOS device detected - audio will be initialized on first user interaction"
-      );
+      if (isPWA) {
+        console.log(
+          "🍎 iOS PWA detected - using enhanced audio handling for standalone mode"
+        );
+      } else {
+        console.log(
+          "🍎 iOS browser detected - audio will be initialized on first user interaction"
+        );
+      }
     }
+
+    // Store PWA status for later use
+    this.isPWA = isPWA;
   }
 
   // New method: Request audio permission explicitly
@@ -226,6 +244,17 @@ class AudioManager implements IAudioManager {
   }
 
   async play(soundKey: string): Promise<void> {
+    console.log(`🎵 Attempting to play: ${soundKey}`);
+    console.log(`🔍 Current audio state:`, {
+      isMuted: this.isMuted,
+      isInitialized: this.isInitialized,
+      hasUserInteracted: this.hasUserInteracted,
+      isIOS: this.isIOS,
+      audioContextState: this.audioContext?.state || "null",
+      audioBuffersCount: this.audioBuffers.size,
+      hasBuffer: this.audioBuffers.has(soundKey),
+    });
+
     if (this.isMuted) {
       console.log(`🔇 Audio muted, skipping: ${soundKey}`);
       return;
@@ -233,7 +262,10 @@ class AudioManager implements IAudioManager {
 
     try {
       // Ensure audio context is ready before playing
+      console.log(`🔄 Ensuring audio context is ready...`);
       const audioReady = await this.ensureAudioContext();
+      console.log(`✅ Audio context ready: ${audioReady}`);
+
       if (!audioReady) {
         console.log(`⚠️ Audio not ready, skipping: ${soundKey}`);
         return;
@@ -241,16 +273,22 @@ class AudioManager implements IAudioManager {
 
       const audioBuffer = this.audioBuffers.get(soundKey);
       if (!audioBuffer) {
-        console.warn(`Audio buffer not found for: ${soundKey}`);
+        console.warn(`❌ Audio buffer not found for: ${soundKey}`);
+        console.log(
+          `📋 Available buffers:`,
+          Array.from(this.audioBuffers.keys())
+        );
         return;
       }
 
+      console.log(`🎵 Creating audio source for: ${soundKey}`);
       // Create audio source and connect to destination
       const source = this.audioContext!.createBufferSource();
       source.buffer = audioBuffer;
 
       // iOS-specific volume and connection handling
       if (this.isIOS) {
+        console.log(`🍎 iOS: Setting up gain node`);
         const gainNode = this.audioContext!.createGain();
         gainNode.gain.setValueAtTime(0.8, this.audioContext!.currentTime);
         source.connect(gainNode);
@@ -260,11 +298,13 @@ class AudioManager implements IAudioManager {
       }
 
       // Play the sound
+      console.log(`▶️ Starting audio playback for: ${soundKey}`);
       source.start(0);
-      console.log(`🔊 Playing sound: ${soundKey}`);
+      console.log(`🔊 Successfully started sound: ${soundKey}`);
 
       // Clean up source after playback
       source.onended = () => {
+        console.log(`🏁 Audio playback ended for: ${soundKey}`);
         source.disconnect();
         if (this.isIOS) {
           try {
@@ -275,7 +315,13 @@ class AudioManager implements IAudioManager {
         }
       };
     } catch (error) {
-      console.error(`Failed to play sound ${soundKey}:`, error);
+      console.error(`❌ Failed to play sound ${soundKey}:`, error);
+      console.error(`🔍 Error details:`, {
+        error: error,
+        soundKey: soundKey,
+        audioContextState: this.audioContext?.state,
+        isInitialized: this.isInitialized,
+      });
     }
   }
 
