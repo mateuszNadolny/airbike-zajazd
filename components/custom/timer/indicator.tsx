@@ -65,8 +65,10 @@ export const WorkoutCompletedIndicator = ({
         <h2 className="text-2xl font-bold text-smalt-50 mb-4">
           Trening zakończony 🥳
         </h2>
-        <p className="text-smalt-50 mb-6">
-          Gratulacje! Trening został zakończony.
+        <p className="text-smalt-50 mb-6 text-center">
+          Oboje wiemy, że mogłeś dać z siebie więcej.
+          <br />
+          Może kolejna rundka?
         </p>
         <div className="flex flex-col gap-2">
           <motion.button
